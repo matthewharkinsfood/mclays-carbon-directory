@@ -345,20 +345,15 @@
         // Data loading
         async function loadData() {
             try {
-                const dataUrl = '[PASTE YOUR COPIED WORDPRESS FILE URL HERE]';
+                const dataUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
                 
-                if (dataUrl.includes('[PASTE')) {
-                    showError('Please update the data URL in the HTML file. Replace [PASTE YOUR COPIED WORDPRESS FILE URL HERE] with your actual data source.');
-                    return;
-                }
-
                 const response = await fetch(dataUrl);
                 if (!response.ok) {
                     throw new Error(`HTTP Error: ${response.status}`);
                 }
 
-                const text = await response.text();
-                parseCSVData(text);
+                const jsonData = await response.json();
+                parseJSONData(jsonData);
                 filterAndDisplay();
             } catch (error) {
                 showError(`Failed to load data: ${error.message}`);
@@ -366,48 +361,36 @@
             }
         }
 
-        // Parse CSV data
-        function parseCSVData(csvText) {
-            const lines = csvText.trim().split('\n');
-            if (lines.length < 2) {
-                showError('CSV file appears to be empty or invalid.');
-                return;
-            }
-
-            const headers = lines[0].split(',').map(h => h.trim());
-            
-            // Find column indices
-            const descIdx = headers.findIndex(h => h.toLowerCase().includes('product') || h.toLowerCase().includes('description'));
-            const subCatIdx = headers.findIndex(h => h.toLowerCase().includes('sub-category') || h.toLowerCase().includes('subcategory'));
-            const ukFootprintIdx = headers.findIndex(h => h.toLowerCase().includes('uk') && h.toLowerCase().includes('footprint'));
-            const globalFootprintIdx = headers.findIndex(h => h.toLowerCase().includes('global') && h.toLowerCase().includes('footprint'));
-            const ukGradeIdx = headers.findIndex(h => h.toLowerCase().includes('uk') && h.toLowerCase().includes('grade'));
-            const globalGradeIdx = headers.findIndex(h => h.toLowerCase().includes('global') && h.toLowerCase().includes('grade'));
-
+        // Parse JSON data
+        function parseJSONData(jsonData) {
             allData = [];
 
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-
-                const values = line.split(',').map(v => v.trim());
-                
-                const item = {
-                    description: descIdx >= 0 ? values[descIdx] : 'Unknown',
-                    subCategory: subCatIdx >= 0 ? values[subCatIdx] : 'Unknown',
-                    ukFootprint: ukFootprintIdx >= 0 ? parseFloat(values[ukFootprintIdx]) : null,
-                    globalFootprint: globalFootprintIdx >= 0 ? parseFloat(values[globalFootprintIdx]) : null,
-                    ukGrade: ukGradeIdx >= 0 ? values[ukGradeIdx] : null,
-                    globalGrade: globalGradeIdx >= 0 ? values[globalGradeIdx] : null
-                };
-
-                if (item.description && item.description !== 'Unknown') {
-                    allData.push(item);
-                }
+            if (Array.isArray(jsonData)) {
+                jsonData.forEach(item => {
+                    allData.push({
+                        description: item.product_description || item.description || 'Unknown',
+                        subCategory: item.sub_category || item.subcategory || 'Unknown',
+                        ukFootprint: parseFloat(item.uk_footprint) || null,
+                        globalFootprint: parseFloat(item.global_footprint) || null,
+                        ukGrade: item.uk_grade || null,
+                        globalGrade: item.global_grade || null
+                    });
+                });
+            } else if (jsonData.data && Array.isArray(jsonData.data)) {
+                jsonData.data.forEach(item => {
+                    allData.push({
+                        description: item.product_description || item.description || 'Unknown',
+                        subCategory: item.sub_category || item.subcategory || 'Unknown',
+                        ukFootprint: parseFloat(item.uk_footprint) || null,
+                        globalFootprint: parseFloat(item.global_footprint) || null,
+                        ukGrade: item.uk_grade || null,
+                        globalGrade: item.global_grade || null
+                    });
+                });
             }
 
             if (allData.length === 0) {
-                showError('No valid data found in CSV file.');
+                showError('No valid data found in JSON file.');
             }
         }
 
