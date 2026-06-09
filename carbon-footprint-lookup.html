@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Carbon Footprint Lookup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            margin-bottom: 25px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .toggle-section {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            background: #e5e7eb;
+            border-radius: 20px;
+            padding: 4px;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-option {
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #6b7280;
+            background: transparent;
+            border: none;
+        }
+
+        .toggle-option.active {
+            background: white;
+            color: #10b981;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .tip-box {
+            margin-top: 18px;
+            padding: 16px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            border-left: 4px solid #10b981;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #047857;
+            line-height: 1.6;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .results-header {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .product-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .product-row:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .product-name {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 15px;
+        }
+
+        .product-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #6b7280;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .footprint-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .grade-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-left: auto;
+        }
+
+        .grade-a {
+            background: #047857;
+            color: #ecfdf5;
+        }
+
+        .grade-b {
+            background: #86efac;
+            color: #15803d;
+        }
+
+        .grade-c {
+            background: #fcd34d;
+            color: #92400e;
+        }
+
+        .grade-d {
+            background: #f97316;
+            color: #fef2f2;
+        }
+
+        .grade-e {
+            background: #dc2626;
+            color: #fef2f2;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            padding: 16px;
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            border-radius: 8px;
+            color: #991b1b;
+            font-size: 14px;
+        }
+
+        .data-unavailable {
+            color: #d1d5db;
+            font-style: italic;
+        }
+
+        @media (max-width: 640px) {
+            .container-wrapper {
+                padding: 12px;
+            }
+
+            .header-section {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 22px;
+            }
+
+            .product-row {
+                padding: 12px;
+            }
+
+            .product-details {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .grade-badge {
+                margin-left: 0;
+                margin-top: 8px;
+            }
+
+            .toggle-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="header-section">
+            <h1 class="title">🌍 Food Carbon Footprint Lookup</h1>
+            <p class="subtitle">Search for sustainable food sourcing options and understand environmental impact</p>
+
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Search produce (e.g., Tomatoes, Beef, Apples)..."
+            >
+
+            <div class="toggle-section">
+                <span class="toggle-label">Sourcing:</span>
+                <div class="toggle-switch">
+                    <button class="toggle-option active" data-sourcing="UK">UK Sourced</button>
+                    <button class="toggle-option" data-sourcing="Global">Globally Sourced</button>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                💡 <strong>Chef's Tip:</strong> Use our Seasonality Calendar! If this item is currently in-season locally, check the UK tab for local impacts. If out-of-season, toggle to Global sourcing to see how food miles change the footprint grade.
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">Results</div>
+            <div id="resultsContainer" class="product-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading carbon footprint data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let currentSourcing = 'UK';
+
+        // Data loading
+        async function loadData() {
+            try {
+                const dataUrl = '[PASTE YOUR COPIED WORDPRESS FILE URL HERE]';
+                
+                if (dataUrl.includes('[PASTE')) {
+                    showError('Please update the data URL in the HTML file. Replace [PASTE YOUR COPIED WORDPRESS FILE URL HERE] with your actual data source.');
+                    return;
+                }
+
+                const response = await fetch(dataUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const text = await response.text();
+                parseCSVData(text);
+                filterAndDisplay();
+            } catch (error) {
+                showError(`Failed to load data: ${error.message}`);
+                console.error('Data loading error:', error);
+            }
+        }
+
+        // Parse CSV data
+        function parseCSVData(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) {
+                showError('CSV file appears to be empty or invalid.');
+                return;
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            // Find column indices
+            const descIdx = headers.findIndex(h => h.toLowerCase().includes('product') || h.toLowerCase().includes('description'));
+            const subCatIdx = headers.findIndex(h => h.toLowerCase().includes('sub-category') || h.toLowerCase().includes('subcategory'));
+            const ukFootprintIdx = headers.findIndex(h => h.toLowerCase().includes('uk') && h.toLowerCase().includes('footprint'));
+            const globalFootprintIdx = headers.findIndex(h => h.toLowerCase().includes('global') && h.toLowerCase().includes('footprint'));
+            const ukGradeIdx = headers.findIndex(h => h.toLowerCase().includes('uk') && h.toLowerCase().includes('grade'));
+            const globalGradeIdx = headers.findIndex(h => h.toLowerCase().includes('global') && h.toLowerCase().includes('grade'));
+
+            allData = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const values = line.split(',').map(v => v.trim());
+                
+                const item = {
+                    description: descIdx >= 0 ? values[descIdx] : 'Unknown',
+                    subCategory: subCatIdx >= 0 ? values[subCatIdx] : 'Unknown',
+                    ukFootprint: ukFootprintIdx >= 0 ? parseFloat(values[ukFootprintIdx]) : null,
+                    globalFootprint: globalFootprintIdx >= 0 ? parseFloat(values[globalFootprintIdx]) : null,
+                    ukGrade: ukGradeIdx >= 0 ? values[ukGradeIdx] : null,
+                    globalGrade: globalGradeIdx >= 0 ? values[globalGradeIdx] : null
+                };
+
+                if (item.description && item.description !== 'Unknown') {
+                    allData.push(item);
+                }
+            }
+
+            if (allData.length === 0) {
+                showError('No valid data found in CSV file.');
+            }
+        }
+
+        // Filter and display results
+        function filterAndDisplay() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const container = document.getElementById('resultsContainer');
+
+            if (allData.length === 0) {
+                return;
+            }
+
+            let filtered = allData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    item.description.toLowerCase().includes(searchTerm) ||
+                    item.subCategory.toLowerCase().includes(searchTerm);
+                return matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <p>No products found matching "<strong>${searchTerm}</strong>"</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Try searching for different ingredients or categories</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => createProductRow(item)).join('');
+        }
+
+        // Create product row HTML
+        function createProductRow(item) {
+            const footprint = currentSourcing === 'UK' ? item.ukFootprint : item.globalFootprint;
+            const grade = currentSourcing === 'UK' ? item.ukGrade : item.globalGrade;
+
+            const footprintDisplay = footprint && !isNaN(footprint) 
+                ? `${parseFloat(footprint).toFixed(2)} kg CO₂e per kg`
+                : 'Data unavailable';
+
+            const gradeDisplay = grade && grade !== 'N/A' && grade !== '' 
+                ? grade.toUpperCase()
+                : '—';
+
+            const gradeBadgeClass = {
+                'A': 'grade-a',
+                'B': 'grade-b',
+                'C': 'grade-c',
+                'D': 'grade-d',
+                'E': 'grade-e'
+            }[gradeDisplay] || 'grade-badge' + ` style="background: #d1d5db; color: #374151;"`;
+
+            return `
+                <div class="product-row">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                        <div>
+                            <div class="product-name">${escapeHtml(item.description)}</div>
+                            <div class="product-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Category:</span>
+                                    <span>${escapeHtml(item.subCategory)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Footprint:</span>
+                                    <span class="footprint-value ${footprint && !isNaN(footprint) ? '' : 'data-unavailable'}">
+                                        ${footprintDisplay}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grade-badge ${typeof gradeBadgeClass === 'string' ? gradeBadgeClass : ''}" ${typeof gradeBadgeClass !== 'string' ? gradeBadgeClass : ''}>
+                            ${gradeDisplay}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `<div class="error-message">⚠️ ${message}</div>`;
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
+
+        document.querySelectorAll('.toggle-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSourcing = btn.dataset.sourcing;
+                filterAndDisplay();
+            });
+        });
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
