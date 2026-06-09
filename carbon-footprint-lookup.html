@@ -342,21 +342,48 @@
         let allData = [];
         let currentSourcing = 'UK';
 
-        // Data loading
+        // Data loading with CORS proxy
         async function loadData() {
             try {
                 const dataUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
                 
-                const response = await fetch(dataUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
+                // Try multiple CORS proxy options
+                const proxies = [
+                    `https://corsproxy.io/?${encodeURIComponent(dataUrl)}`,
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(dataUrl)}`,
+                    dataUrl // fallback to direct (in case CORS is fixed)
+                ];
+
+                let jsonData = null;
+                let lastError = null;
+
+                for (const proxyUrl of proxies) {
+                    try {
+                        const response = await fetch(proxyUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            jsonData = await response.json();
+                            break;
+                        }
+                    } catch (e) {
+                        lastError = e;
+                        continue;
+                    }
                 }
 
-                const jsonData = await response.json();
+                if (!jsonData) {
+                    throw lastError || new Error('Unable to load data from all sources');
+                }
+
                 parseJSONData(jsonData);
                 filterAndDisplay();
             } catch (error) {
-                showError(`Failed to load data: ${error.message}`);
+                showError(`Failed to load data: ${error.message}. Please ensure your WordPress site has CORS headers enabled or contact your hosting provider.`);
                 console.error('Data loading error:', error);
             }
         }
