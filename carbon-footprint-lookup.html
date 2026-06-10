@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Carbon Footprint Lookup</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * {
             margin: 0;
@@ -13,239 +12,214 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
-
-        .container-wrapper {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header-section {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-            margin-bottom: 25px;
-        }
-
-        .title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 20px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            background: #f9fafb;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #10b981;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        .toggle-section {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .toggle-label {
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
-        }
-
-        .toggle-switch {
-            display: flex;
-            background: #e5e7eb;
-            border-radius: 20px;
-            padding: 4px;
-            gap: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-option {
-            padding: 8px 16px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #6b7280;
-            background: transparent;
-            border: none;
-        }
-
-        .toggle-option.active {
-            background: white;
-            color: #10b981;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .tip-box {
-            margin-top: 18px;
-            padding: 16px;
-            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
-            border-left: 4px solid #10b981;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #047857;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
             line-height: 1.6;
         }
 
-        .results-section {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
         }
 
-        .results-header {
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #1a472a;
+        }
+
+        .header p {
             font-size: 16px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 16px;
+            color: #666;
         }
 
-        .product-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .product-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 16px;
-            background: #f9fafb;
+        .controls {
+            background: white;
+            padding: 25px;
             border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
 
-        .product-row:hover {
-            background: #f3f4f6;
-            border-color: #d1d5db;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2d6a3e;
+            box-shadow: 0 0 0 3px rgba(45, 106, 62, 0.1);
+        }
+
+        .sourcing-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .sourcing-toggle label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            background: #f0f0f0;
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #2d6a3e;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle-btn:hover {
+            background: white;
+            color: #2d6a3e;
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #2d6a3e;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1b5e20;
+        }
+
+        .info-box a {
+            color: #2d6a3e;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        .results {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .results-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1a472a;
+        }
+
+        .product-item {
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .product-item:hover {
+            border-color: #2d6a3e;
+            box-shadow: 0 2px 6px rgba(45, 106, 62, 0.15);
+        }
+
+        .product-info {
+            flex: 1;
         }
 
         .product-name {
-            font-weight: 700;
-            color: #1f2937;
-            font-size: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a472a;
+            margin-bottom: 6px;
         }
 
-        .product-details {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+        .product-meta {
             font-size: 13px;
-        }
-
-        .detail-item {
+            color: #666;
             display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #6b7280;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        .detail-label {
-            font-weight: 600;
-            color: #4b5563;
+        .meta-item {
+            display: flex;
+            gap: 6px;
         }
 
-        .footprint-value {
-            color: #1f2937;
+        .meta-label {
             font-weight: 600;
+            color: #333;
         }
 
         .grade-badge {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
             font-weight: 700;
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            display: inline-block;
-            margin-left: auto;
+            white-space: nowrap;
         }
 
-        .grade-a {
-            background: #047857;
-            color: #ecfdf5;
-        }
-
-        .grade-b {
-            background: #86efac;
-            color: #15803d;
-        }
-
-        .grade-c {
-            background: #fcd34d;
-            color: #92400e;
-        }
-
-        .grade-d {
-            background: #f97316;
-            color: #fef2f2;
-        }
-
-        .grade-e {
-            background: #dc2626;
-            color: #fef2f2;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: #9ca3af;
-        }
-
-        .no-results-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.5;
-        }
+        .grade-a { background: #1b5e20; color: white; }
+        .grade-b { background: #4caf50; color: white; }
+        .grade-c { background: #ffd54f; color: #333; }
+        .grade-d { background: #ff9800; color: white; }
+        .grade-e { background: #d32f2f; color: white; }
+        .grade-na { background: #ccc; color: #666; }
 
         .loading {
             text-align: center;
             padding: 40px 20px;
-            color: #6b7280;
+            color: #666;
         }
 
-        .loading-spinner {
+        .spinner {
             display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #e5e7eb;
-            border-top: 3px solid #10b981;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #2d6a3e;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         @keyframes spin {
@@ -253,48 +227,54 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error-message {
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .error-box {
+            background: #ffebee;
+            border-left: 4px solid #d32f2f;
             padding: 16px;
-            background: #fef2f2;
-            border-left: 4px solid #dc2626;
-            border-radius: 8px;
-            color: #991b1b;
+            border-radius: 6px;
+            color: #b71c1c;
             font-size: 14px;
         }
 
-        .data-unavailable {
-            color: #d1d5db;
-            font-style: italic;
+        .debug-info {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-top: 15px;
+            color: #555;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         @media (max-width: 640px) {
-            .container-wrapper {
-                padding: 12px;
+            .header h1 {
+                font-size: 24px;
             }
 
-            .header-section {
-                padding: 20px;
-            }
-
-            .title {
-                font-size: 22px;
-            }
-
-            .product-row {
-                padding: 12px;
-            }
-
-            .product-details {
+            .product-item {
                 flex-direction: column;
                 align-items: flex-start;
             }
 
             .grade-badge {
-                margin-left: 0;
-                margin-top: 8px;
+                margin-top: 10px;
             }
 
-            .toggle-section {
+            .product-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .sourcing-toggle {
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -302,36 +282,39 @@
     </style>
 </head>
 <body>
-    <div class="container-wrapper">
-        <div class="header-section">
-            <h1 class="title">🌍 Food Carbon Footprint Lookup</h1>
-            <p class="subtitle">Search for sustainable food sourcing options and understand environmental impact</p>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Carbon Footprint Lookup</h1>
+            <p>Find the environmental impact of your food sourcing</p>
+        </div>
 
-            <input 
-                type="text" 
-                id="searchInput" 
-                class="search-input" 
-                placeholder="Search produce (e.g., Tomatoes, Beef, Apples)..."
-            >
+        <div class="controls">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search for produce... (e.g., Tomatoes, Beef, Apples)"
+                >
+            </div>
 
-            <div class="toggle-section">
-                <span class="toggle-label">Sourcing:</span>
-                <div class="toggle-switch">
-                    <button class="toggle-option active" data-sourcing="UK">UK Sourced</button>
-                    <button class="toggle-option" data-sourcing="Global">Globally Sourced</button>
+            <div class="sourcing-toggle">
+                <label>Sourcing:</label>
+                <div class="toggle-group">
+                    <button class="toggle-btn active" data-sourcing="UK">UK Sourced</button>
+                    <button class="toggle-btn" data-sourcing="Global">Globally Sourced</button>
                 </div>
             </div>
 
-            <div class="tip-box">
-                💡 <strong>Chef's Tip:</strong> Use our Seasonality Calendar! If this item is currently in-season locally, check the UK tab for local impacts. If out-of-season, toggle to Global sourcing to see how food miles change the footprint grade.
+            <div class="info-box">
+                💡 <strong>Tip:</strong> Check our <a href="https://www.mclaysfoods.co.uk/seasonality-calendar/" target="_blank">Seasonality Calendar</a> to see which items are in-season locally. In-season items have lower environmental impact!
             </div>
         </div>
 
-        <div class="results-section">
-            <div class="results-header">Results</div>
-            <div id="resultsContainer" class="product-list">
+        <div class="results">
+            <div class="results-title">Products</div>
+            <div id="resultsContainer">
                 <div class="loading">
-                    <div class="loading-spinner"></div>
+                    <div class="spinner"></div>
                     <p>Loading carbon footprint data...</p>
                 </div>
             </div>
@@ -341,102 +324,54 @@
     <script>
         let allData = [];
         let currentSourcing = 'UK';
+        const dataUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
 
-        // Data loading via direct fetch with improved error handling
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadData);
+
         async function loadData() {
             try {
-                const dataUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
-                
-                const response = await fetch(dataUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    mode: 'cors',
-                    credentials: 'omit'
-                });
+                console.log('Starting data load from:', dataUrl);
+                const response = await fetch(dataUrl);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP Error: ${response.status}`);
                 }
 
                 const jsonData = await response.json();
+                console.log('Data loaded successfully:', jsonData);
                 parseJSONData(jsonData);
                 filterAndDisplay();
             } catch (error) {
-                console.error('Primary fetch failed, trying alternative method:', error);
-                loadViaXHR();
+                console.error('Fetch failed:', error);
+                showError(`Failed to load data: ${error.message}. Check browser console for details.`);
             }
         }
 
-        // Fallback method using XMLHttpRequest (better CORS handling)
-        function loadViaXHR() {
-            const dataUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
-            const xhr = new XMLHttpRequest();
-
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        const jsonData = JSON.parse(xhr.responseText);
-                        parseJSONData(jsonData);
-                        filterAndDisplay();
-                    } catch (e) {
-                        showError('Error parsing data: ' + e.message);
-                    }
-                } else {
-                    showError(`Failed to load data: HTTP ${xhr.status}`);
-                }
-            };
-
-            xhr.onerror = function() {
-                showError('Failed to load data. If this persists, please ask your hosting provider to enable CORS headers for JSON files.');
-            };
-
-            xhr.ontimeout = function() {
-                showError('Data loading timed out. Please try again.');
-            };
-
-            xhr.timeout = 10000;
-            xhr.open('GET', dataUrl, true);
-            xhr.setRequestHeader('Accept', 'application/json');
-            xhr.send();
-        }
-
-        // Parse JSON data
         function parseJSONData(jsonData) {
             allData = [];
 
-            if (Array.isArray(jsonData)) {
-                jsonData.forEach(item => {
-                    allData.push({
-                        description: item.product_description || item.description || 'Unknown',
-                        subCategory: item.sub_category || item.subcategory || 'Unknown',
-                        ukFootprint: parseFloat(item.uk_footprint) || null,
-                        globalFootprint: parseFloat(item.global_footprint) || null,
-                        ukGrade: item.uk_grade || null,
-                        globalGrade: item.global_grade || null
-                    });
+            // Handle different JSON structures
+            const dataArray = Array.isArray(jsonData) ? jsonData : (jsonData.data && Array.isArray(jsonData.data) ? jsonData.data : []);
+
+            dataArray.forEach(item => {
+                allData.push({
+                    description: item.product_description || item.description || 'Unknown',
+                    subCategory: item.sub_category || item.subcategory || 'Unknown',
+                    ukFootprint: item.uk_footprint ? parseFloat(item.uk_footprint) : null,
+                    globalFootprint: item.global_footprint ? parseFloat(item.global_footprint) : null,
+                    ukGrade: item.uk_grade || null,
+                    globalGrade: item.global_grade || null
                 });
-            } else if (jsonData.data && Array.isArray(jsonData.data)) {
-                jsonData.data.forEach(item => {
-                    allData.push({
-                        description: item.product_description || item.description || 'Unknown',
-                        subCategory: item.sub_category || item.subcategory || 'Unknown',
-                        ukFootprint: parseFloat(item.uk_footprint) || null,
-                        globalFootprint: parseFloat(item.global_footprint) || null,
-                        ukGrade: item.uk_grade || null,
-                        globalGrade: item.global_grade || null
-                    });
-                });
-            }
+            });
+
+            console.log('Parsed', allData.length, 'items');
 
             if (allData.length === 0) {
-                showError('No valid data found in JSON file. Please check your data format.');
+                showError('No valid data found in JSON file.');
             }
         }
 
-        // Filter and display results
         function filterAndDisplay() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('resultsContainer');
@@ -455,9 +390,8 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="no-results">
-                        <div class="no-results-icon">🔍</div>
                         <p>No products found matching "<strong>${searchTerm}</strong>"</p>
-                        <p style="font-size: 12px; margin-top: 8px;">Try searching for different ingredients or categories</p>
+                        <p style="font-size: 13px; margin-top: 10px;">Try a different search term</p>
                     </div>
                 `;
                 return;
@@ -466,54 +400,46 @@
             container.innerHTML = filtered.map(item => createProductRow(item)).join('');
         }
 
-        // Create product row HTML
         function createProductRow(item) {
             const footprint = currentSourcing === 'UK' ? item.ukFootprint : item.globalFootprint;
             const grade = currentSourcing === 'UK' ? item.ukGrade : item.globalGrade;
 
             const footprintDisplay = footprint && !isNaN(footprint) 
-                ? `${parseFloat(footprint).toFixed(2)} kg CO₂e per kg`
-                : 'Data unavailable';
+                ? `${parseFloat(footprint).toFixed(2)} kg CO₂e/kg`
+                : 'N/A';
 
             const gradeDisplay = grade && grade !== 'N/A' && grade !== '' 
                 ? grade.toUpperCase()
                 : '—';
 
-            const gradeBadgeClass = {
+            const gradeClass = {
                 'A': 'grade-a',
                 'B': 'grade-b',
                 'C': 'grade-c',
                 'D': 'grade-d',
                 'E': 'grade-e'
-            }[gradeDisplay] || 'grade-badge' + ` style="background: #d1d5db; color: #374151;"`;
+            }[gradeDisplay] || 'grade-na';
 
             return `
-                <div class="product-row">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
-                        <div>
-                            <div class="product-name">${escapeHtml(item.description)}</div>
-                            <div class="product-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Category:</span>
-                                    <span>${escapeHtml(item.subCategory)}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Footprint:</span>
-                                    <span class="footprint-value ${footprint && !isNaN(footprint) ? '' : 'data-unavailable'}">
-                                        ${footprintDisplay}
-                                    </span>
-                                </div>
+                <div class="product-item">
+                    <div class="product-info">
+                        <div class="product-name">${escapeHtml(item.description)}</div>
+                        <div class="product-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Category:</span>
+                                <span>${escapeHtml(item.subCategory)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Footprint:</span>
+                                <span>${footprintDisplay}</span>
                             </div>
                         </div>
-                        <div class="grade-badge ${typeof gradeBadgeClass === 'string' ? gradeBadgeClass : ''}" ${typeof gradeBadgeClass !== 'string' ? gradeBadgeClass : ''}>
-                            ${gradeDisplay}
-                        </div>
                     </div>
+                    <div class="grade-badge ${gradeClass}">${gradeDisplay}</div>
                 </div>
             `;
         }
 
-        // Utility function to escape HTML
         function escapeHtml(text) {
             const map = {
                 '&': '&amp;',
@@ -525,26 +451,22 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // Show error message
         function showError(message) {
             const container = document.getElementById('resultsContainer');
-            container.innerHTML = `<div class="error-message">⚠️ ${message}</div>`;
+            container.innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
         }
 
         // Event listeners
         document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
 
-        document.querySelectorAll('.toggle-option').forEach(btn => {
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.toggle-option').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentSourcing = btn.dataset.sourcing;
                 filterAndDisplay();
             });
         });
-
-        // Load data on page load
-        window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
