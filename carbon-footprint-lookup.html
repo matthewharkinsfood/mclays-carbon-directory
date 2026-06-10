@@ -242,6 +242,21 @@
             font-size: 14px;
         }
 
+        .debug-box {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-top: 15px;
+            color: #555;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
         .retry-btn {
             background: #2d6a3e;
             color: white;
@@ -333,48 +348,54 @@
 
         async function loadData() {
             try {
-                // Try multiple methods to fetch the data
-                let jsonData = null;
-                
-                // Method 1: Simple fetch with no-cors
+                console.log('🔄 Starting data load...');
+                console.log('URL:', baseUrl);
+
+                // Method 1: Standard fetch
                 try {
-                    console.log('Attempt 1: Standard fetch...');
+                    console.log('📡 Attempt 1: Standard fetch...');
                     const response = await fetch(baseUrl, {
                         method: 'GET',
                         headers: { 'Accept': 'application/json' }
                     });
+                    
                     if (response.ok) {
-                        jsonData = await response.json();
-                        console.log('✓ Success with standard fetch');
+                        const jsonData = await response.json();
+                        console.log('✅ Data loaded successfully');
+                        console.log('Response type:', typeof jsonData);
+                        console.log('Is array?', Array.isArray(jsonData));
+                        console.log('Raw data:', jsonData);
+                        parseJSONData(jsonData);
+                        filterAndDisplay();
+                        return;
                     }
                 } catch (e1) {
-                    console.log('Standard fetch failed, trying alternative...');
-                    
-                    // Method 2: Using XMLHttpRequest
-                    try {
-                        console.log('Attempt 2: XMLHttpRequest...');
-                        jsonData = await fetchViaXHR(baseUrl);
-                        console.log('✓ Success with XMLHttpRequest');
-                    } catch (e2) {
-                        console.log('XMLHttpRequest failed, trying data URL approach...');
-                        throw new Error('All fetch methods failed. CORS may still be blocking the request.');
-                    }
+                    console.log('❌ Standard fetch failed:', e1.message);
                 }
 
-                if (!jsonData) {
-                    throw new Error('No data received');
+                // Method 2: XMLHttpRequest
+                try {
+                    console.log('📡 Attempt 2: XMLHttpRequest...');
+                    const jsonData = await fetchViaXHR(baseUrl);
+                    console.log('✅ Data loaded successfully via XHR');
+                    console.log('Response type:', typeof jsonData);
+                    console.log('Raw data:', jsonData);
+                    parseJSONData(jsonData);
+                    filterAndDisplay();
+                    return;
+                } catch (e2) {
+                    console.log('❌ XMLHttpRequest failed:', e2.message);
                 }
 
-                parseJSONData(jsonData);
-                filterAndDisplay();
+                throw new Error('All fetch methods failed');
             } catch (error) {
-                console.error('✗ Load failed:', error.message);
+                console.error('❌ Load failed:', error);
                 showError(`
                     Failed to load data: ${error.message}<br><br>
-                    <strong>Please contact your hosting provider and ask them to:</strong><br>
-                    1. Verify the WP CORS plugin is properly enabled<br>
-                    2. Check that CORS headers are being added to the JSON file<br>
-                    3. Test that the JSON file is publicly accessible<br><br>
+                    <div class="debug-box">Debug Info:
+Browser: ${navigator.userAgent.substring(0, 50)}...
+URL: ${baseUrl}
+Check browser console (F12) for more details</div>
                     <button class="retry-btn" onclick="location.reload()">Try Again</button>
                 `);
             }
@@ -406,21 +427,43 @@
         }
 
         function parseJSONData(jsonData) {
+            console.log('🔍 Parsing JSON data...');
             allData = [];
-            const dataArray = Array.isArray(jsonData) ? jsonData : (jsonData.data && Array.isArray(jsonData.data) ? jsonData.data : []);
 
-            dataArray.forEach(item => {
-                allData.push({
+            // Handle different JSON structures
+            let dataArray = [];
+            if (Array.isArray(jsonData)) {
+                console.log('✓ Data is a direct array');
+                dataArray = jsonData;
+            } else if (jsonData.data && Array.isArray(jsonData.data)) {
+                console.log('✓ Data is nested in .data property');
+                dataArray = jsonData.data;
+            } else {
+                console.log('⚠️ Unexpected data structure');
+                console.log('Keys in object:', Object.keys(jsonData));
+            }
+
+            console.log('Total items in array:', dataArray.length);
+
+            dataArray.forEach((item, index) => {
+                const parsed = {
                     description: item.product_description || item.description || 'Unknown',
                     subCategory: item.sub_category || item.subcategory || 'Unknown',
                     ukFootprint: item.uk_footprint ? parseFloat(item.uk_footprint) : null,
                     globalFootprint: item.global_footprint ? parseFloat(item.global_footprint) : null,
                     ukGrade: item.uk_grade || null,
                     globalGrade: item.global_grade || null
-                });
+                };
+                
+                if (index < 3) {
+                    console.log(`Sample item ${index}:`, parsed);
+                }
+                
+                allData.push(parsed);
             });
 
-            console.log('✓ Parsed ' + allData.length + ' items');
+            console.log('✅ Parsed ' + allData.length + ' total items');
+            console.log('First 3 product names:', allData.slice(0, 3).map(p => p.description));
 
             if (allData.length === 0) {
                 showError('No valid data found in JSON file.');
@@ -431,19 +474,31 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('resultsContainer');
 
-            if (allData.length === 0) return;
+            console.log('🔎 Filtering with search term:', searchTerm);
+            console.log('Total items available:', allData.length);
+
+            if (allData.length === 0) {
+                console.log('No data to display');
+                return;
+            }
 
             let filtered = allData.filter(item => {
-                return !searchTerm || 
-                    item.description.toLowerCase().includes(searchTerm) ||
-                    item.subCategory.toLowerCase().includes(searchTerm);
+                const descMatch = item.description.toLowerCase().includes(searchTerm);
+                const catMatch = item.subCategory.toLowerCase().includes(searchTerm);
+                return !searchTerm || descMatch || catMatch;
             });
+
+            console.log('Filtered results:', filtered.length);
+            if (filtered.length > 0) {
+                console.log('First match:', filtered[0].description);
+            }
 
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="no-results">
                         <p>No products found matching "<strong>${searchTerm}</strong>"</p>
                         <p style="font-size: 13px; margin-top: 10px;">Try a different search term</p>
+                        <p style="font-size: 12px; margin-top: 8px; color: #ccc;">Available items: ${allData.length}</p>
                     </div>
                 `;
                 return;
