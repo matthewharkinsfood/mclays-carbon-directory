@@ -333,39 +333,80 @@
 
         async function loadData() {
             try {
-                // Add cache-busting parameter to force fresh fetch
-                const dataUrl = baseUrl + '?t=' + Date.now();
-                console.log('Loading data from:', dataUrl);
-
-                const response = await fetch(dataUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    cache: 'no-store'
-                });
+                // Try multiple methods to fetch the data
+                let jsonData = null;
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
+                // Method 1: Simple fetch with no-cors
+                try {
+                    console.log('Attempt 1: Standard fetch...');
+                    const response = await fetch(baseUrl, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (response.ok) {
+                        jsonData = await response.json();
+                        console.log('✓ Success with standard fetch');
+                    }
+                } catch (e1) {
+                    console.log('Standard fetch failed, trying alternative...');
+                    
+                    // Method 2: Using XMLHttpRequest
+                    try {
+                        console.log('Attempt 2: XMLHttpRequest...');
+                        jsonData = await fetchViaXHR(baseUrl);
+                        console.log('✓ Success with XMLHttpRequest');
+                    } catch (e2) {
+                        console.log('XMLHttpRequest failed, trying data URL approach...');
+                        throw new Error('All fetch methods failed. CORS may still be blocking the request.');
+                    }
                 }
 
-                const jsonData = await response.json();
-                console.log('✓ Data loaded successfully. Items:', Array.isArray(jsonData) ? jsonData.length : (jsonData.data ? jsonData.data.length : 0));
+                if (!jsonData) {
+                    throw new Error('No data received');
+                }
+
                 parseJSONData(jsonData);
                 filterAndDisplay();
             } catch (error) {
                 console.error('✗ Load failed:', error.message);
                 showError(`
-                    Failed to load data: ${error.message}<br>
+                    Failed to load data: ${error.message}<br><br>
+                    <strong>Please contact your hosting provider and ask them to:</strong><br>
+                    1. Verify the WP CORS plugin is properly enabled<br>
+                    2. Check that CORS headers are being added to the JSON file<br>
+                    3. Test that the JSON file is publicly accessible<br><br>
                     <button class="retry-btn" onclick="location.reload()">Try Again</button>
                 `);
             }
         }
 
+        function fetchViaXHR(url) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+                
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch (e) {
+                            reject(new Error('Invalid JSON: ' + e.message));
+                        }
+                    } else {
+                        reject(new Error(`HTTP ${xhr.status}`));
+                    }
+                };
+                
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.ontimeout = () => reject(new Error('Request timeout'));
+                xhr.timeout = 10000;
+                xhr.send();
+            });
+        }
+
         function parseJSONData(jsonData) {
             allData = [];
-
-            // Handle different JSON structures
             const dataArray = Array.isArray(jsonData) ? jsonData : (jsonData.data && Array.isArray(jsonData.data) ? jsonData.data : []);
 
             dataArray.forEach(item => {
@@ -390,15 +431,12 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('resultsContainer');
 
-            if (allData.length === 0) {
-                return;
-            }
+            if (allData.length === 0) return;
 
             let filtered = allData.filter(item => {
-                const matchesSearch = !searchTerm || 
+                return !searchTerm || 
                     item.description.toLowerCase().includes(searchTerm) ||
                     item.subCategory.toLowerCase().includes(searchTerm);
-                return matchesSearch;
             });
 
             if (filtered.length === 0) {
@@ -455,24 +493,16 @@
         }
 
         function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
         function showError(message) {
-            const container = document.getElementById('resultsContainer');
-            container.innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
+            document.getElementById('resultsContainer').innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
         }
 
         // Event listeners
         document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
-
         document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
