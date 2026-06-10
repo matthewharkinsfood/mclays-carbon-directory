@@ -242,17 +242,19 @@
             font-size: 14px;
         }
 
-        .debug-info {
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            padding: 12px;
+        .retry-btn {
+            background: #2d6a3e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
             border-radius: 6px;
-            font-size: 12px;
-            font-family: monospace;
-            margin-top: 15px;
-            color: #555;
-            max-height: 200px;
-            overflow-y: auto;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .retry-btn:hover {
+            background: #1a472a;
         }
 
         @media (max-width: 640px) {
@@ -324,27 +326,39 @@
     <script>
         let allData = [];
         let currentSourcing = 'UK';
-        const dataUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
+        const baseUrl = 'https://www.mclaysfoods.co.uk/wp-content/uploads/2026/06/combined_produce_data.json';
 
         // Load data on page load
         window.addEventListener('DOMContentLoaded', loadData);
 
         async function loadData() {
             try {
-                console.log('Starting data load from:', dataUrl);
-                const response = await fetch(dataUrl);
+                // Add cache-busting parameter to force fresh fetch
+                const dataUrl = baseUrl + '?t=' + Date.now();
+                console.log('Loading data from:', dataUrl);
+
+                const response = await fetch(dataUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    cache: 'no-store'
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP Error: ${response.status}`);
                 }
 
                 const jsonData = await response.json();
-                console.log('Data loaded successfully:', jsonData);
+                console.log('✓ Data loaded successfully. Items:', Array.isArray(jsonData) ? jsonData.length : (jsonData.data ? jsonData.data.length : 0));
                 parseJSONData(jsonData);
                 filterAndDisplay();
             } catch (error) {
-                console.error('Fetch failed:', error);
-                showError(`Failed to load data: ${error.message}. Check browser console for details.`);
+                console.error('✗ Load failed:', error.message);
+                showError(`
+                    Failed to load data: ${error.message}<br>
+                    <button class="retry-btn" onclick="location.reload()">Try Again</button>
+                `);
             }
         }
 
@@ -365,7 +379,7 @@
                 });
             });
 
-            console.log('Parsed', allData.length, 'items');
+            console.log('✓ Parsed ' + allData.length + ' items');
 
             if (allData.length === 0) {
                 showError('No valid data found in JSON file.');
